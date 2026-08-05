@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+!notebooks/*.ipynb
+
+# Data files (keep structure, ignore large CSVs)
+data/raw/*.csv
+data/processed/*.csv
+data/raw/*.zip
+data/processed/*.zip
+
+# Environment
+.env
+.venv/
+venv/
+env/
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Models
+models/
+*.pkl
+*.joblib
+
+# ChromaDB (vector store)
+chroma_db/
+
+# Streamlit
+.streamlit/secrets.toml
