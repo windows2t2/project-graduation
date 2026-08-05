@@ -187,8 +187,8 @@ with tab3:
 # TAB 4: 🌍 Live Job Finder (Tavily)
 # ══════════════════════════════════════════════
 with tab4:
-    st.header("🌍 Live DS/ML/DL Job Finder")
-    st.markdown("Search the web for **real-time job postings** across 6 regions using Tavily.")
+    st.header("🌍 Live Job Finder")
+    st.markdown("Search the web for **real-time job postings** across 7 regions — DS/ML/DL & Aerospace engineering.")
 
     tavily_cfg = get_tavily_config()
     has_tavily = bool(tavily_cfg["api_key"])
@@ -199,51 +199,116 @@ with tab4:
     # Show existing jobs
     live_jobs = load_live_jobs()
 
-    col_a, col_b, col_c = st.columns([1, 1, 2])
+    # ── Top bar: collect + metric ──
+    col_a, col_b, col_c = st.columns([1, 1, 3])
     with col_a:
         if has_tavily:
             if st.button("🔍 Collect New Jobs", type="primary"):
-                with st.spinner("Searching 6 regions for DS/ML/DL jobs... This may take 30-60 seconds."):
+                with st.spinner("Searching 7 regions for DS/ML/DL & Aerospace jobs... This may take 30-60 seconds."):
                     live_jobs = collect_live_jobs()
                     st.cache_data.clear()
                     st.rerun()
-
     with col_b:
         if not live_jobs.empty:
             st.metric("Total Jobs Found", len(live_jobs))
-    with col_c:
-        if not live_jobs.empty:
-            st.caption("Jobs from Europe, Middle East, China, Russia, South America & East Asia")
 
     if live_jobs.empty:
         st.info("No jobs collected yet. Click 'Collect New Jobs Now' to search the web.")
-        st.markdown("**Regions searched:** Europe · Middle East · China · Russia · South America · East Asia")
+        st.markdown("**Regions searched:** Europe · Middle East · China · Russia · South America · East Asia · Aerospace")
     else:
-        # Summary by region
-        st.subheader("Jobs by Region")
-        region_summary = summary_by_region(live_jobs)
-        if not region_summary.empty:
-            fig = px.bar(region_summary, x="region", y="job_count",
-                         color="region", labels={"job_count": "Jobs Found"},
-                         color_discrete_sequence=px.colors.qualitative.Bold)
-            st.plotly_chart(fig, use_container_width=True)
+        # ── Field type classification ──
+        ds_keywords = ["data scientist", "machine learning", "deep learning", "AI engineer",
+                       "ml engineer", "dl engineer", "nlp", "computer vision", "data science",
+                       "mlops", "data engineer", "research scientist"]
+        aero_keywords = ["aircraft", "aerospace", "airplane", "airframe", "fuselage",
+                         "wing", "composites", "structural design", "maintenance engineer",
+                         "mechanic", "repair", "overhaul", "aviation"]
 
-        # Filter by region
+        def classify_field(title, snippet):
+            text = f"{title} {snippet}".lower()
+            if any(k in text for k in aero_keywords):
+                return "🛩️ Aerospace"
+            if any(k in text for k in ds_keywords):
+                return "💻 DS / ML / DL"
+            return "📋 Other"
+
+        live_jobs["field"] = live_jobs.apply(
+            lambda r: classify_field(r["title"], r["snippet"]), axis=1
+        )
+
+        # ── Filters ──
+        st.markdown("---")
+        filt_col1, filt_col2, filt_col3 = st.columns([1, 1, 5])
+        with filt_col1:
+            field_options = ["🌐 All Fields", "💻 DS / ML / DL", "🛩️ Aerospace"]
+            sel_field = st.selectbox("🎯 Filter by Field", field_options)
+        with filt_col2:
+            geo_regions = sorted([r for r in live_jobs["region"].dropna().unique()
+                                  if r != "Aerospace"])
+            regions = ["🌍 All Regions"] + geo_regions
+            sel_region = st.selectbox("📍 Filter by Region", regions)
+
+        # Apply filters
+        display = live_jobs.copy()
+        if sel_field != "🌐 All Fields":
+            field_map = {
+                "💻 DS / ML / DL": "💻 DS / ML / DL",
+                "🛩️ Aerospace": "🛩️ Aerospace",
+            }
+            display = display[display["field"] == field_map[sel_field]]
+        if sel_region != "🌍 All Regions":
+            display = display[display["region"] == sel_region]
+
+        with filt_col3:
+            st.caption(f"Showing **{len(display)}** of {len(live_jobs)} jobs")
+
+        # ── Graph at 60% width ──
+        st.subheader("Jobs by Region")
+        graph_col, _ = st.columns([3, 2])
+        with graph_col:
+            region_data = display[display["region"] != "Aerospace"]
+            if not region_data.empty:
+                if sel_field == "🌐 All Fields":
+                    # Stacked bars: split each region by field (DS/ML/DL vs Aerospace only)
+                    grouped = region_data.groupby(["region", "field"]).size().reset_index(name="job_count")
+                    grouped = grouped[grouped["field"] != "📋 Other"]
+                    max_count = int(grouped.groupby("region")["job_count"].sum().max()) if not grouped.empty else 1
+                    fig = px.bar(grouped, x="region", y="job_count", color="field",
+                                 labels={"job_count": "Jobs Found", "field": "Field"},
+                                 color_discrete_map={
+                                     "💻 DS / ML / DL": "#636EFA",
+                                     "🛩️ Aerospace": "#EF553B",
+                                     "📋 Other": "#B6B6B6",
+                                 },
+                                 barmode="stack")
+                else:
+                    grouped = region_data.groupby("region").size().reset_index(name="job_count")
+                    max_count = int(grouped["job_count"].max())
+                    fig = px.bar(grouped, x="region", y="job_count",
+                                 color="region", labels={"job_count": "Jobs Found"},
+                                 color_discrete_sequence=px.colors.qualitative.Bold)
+                fig.update_yaxes(dtick=1, range=[0, max_count + 1])
+                fig.update_layout(height=300, margin=dict(t=10, b=10))
+                st.plotly_chart(fig, use_container_width=False)
+
+        # ── Browse jobs ──
+        st.markdown("---")
         st.subheader("Browse Jobs")
-        regions = ["All"] + sorted(live_jobs["region"].dropna().unique().tolist())
-        sel_region = st.selectbox("Filter by Region", regions)
-        display = live_jobs if sel_region == "All" else live_jobs[live_jobs["region"] == sel_region]
 
         for _, row in display.iterrows():
-            with st.expander(f"🌍 [{row['region']}] {row['title'][:100]}"):
-                st.markdown(f"**Region:** {row['region']}")
+            region_label = f" [{row['region']}]" if row["region"] != "Aerospace" else ""
+            with st.expander(f"{row['field']}{region_label} {row['title'][:100]}"):
+                st.markdown(f"**Field:** {row['field']}")
+                if row["region"] != "Aerospace":
+                    st.markdown(f"**Region:** {row['region']}")
                 st.markdown(f"**Snippet:** {row['snippet'][:500]}")
                 st.markdown(f"🔗 [Open Link]({row['url']})")
                 st.caption(f"Collected: {row.get('collected_at', 'N/A')[:19]}")
 
-        # Export
+        # ── Export ──
+        st.markdown("---")
         csv = live_jobs.to_csv(index=False).encode("utf-8")
-        st.download_button("📥 Download All Jobs (CSV)", csv, "live_ds_ml_dl_jobs.csv", "text/csv")
+        st.download_button("📥 Download All Jobs (CSV)", csv, "live_jobs.csv", "text/csv")
 
 st.markdown("---")
-st.caption("Job Market Intelligence v4 | Ironhack Final Project | DeepSeek + Tavily + Kaggle")
+st.caption("Job Market Intelligence v4 | Ironhack Final Project | DeepSeek + Tavily + HuggingFace")

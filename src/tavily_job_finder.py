@@ -1,5 +1,6 @@
 """
-src/tavily_job_finder.py — v4: Search for LIVE DS/ML/DL jobs across 6 regions using Tavily.
+src/tavily_job_finder.py — v4: Search for LIVE DS/ML/DL jobs + Aerospace engineering jobs
+across 7 regions using Tavily.
 Saves results to data/processed/live_jobs.csv for the Streamlit Job Finder tab.
 """
 import os, json, time
@@ -37,6 +38,11 @@ REGIONS = {
     "East Asia": [
         "data scientist machine learning job 2024 Japan Korea Singapore Taiwan",
         "AI engineer deep learning job 2024 East Asia site: linkedin.com",
+    ],
+    "Aerospace": [
+        "aircraft structural designer mechanical design engineer airframe fuselage wing job",
+        "aerospace structural design engineer airplane aircraft composites vacancy site: linkedin.com",
+        "aircraft maintenance engineer mechanical structural repair overhaul technician job",
     ],
 }
 
@@ -108,7 +114,7 @@ def summary_by_region(df: pd.DataFrame) -> pd.DataFrame:
 if __name__ == "__main__":
     df = collect_live_jobs()
     if not df.empty:
-        print(f"\nCollected {len(df)} live DS/ML/DL jobs:")
+        print(f"\nCollected {len(df)} live jobs (DS/ML/DL + Aerospace):")
         print(summary_by_region(df).to_string(index=False))
     else:
         print("No Tavily key — add TAVILY_API_KEY to .env")
