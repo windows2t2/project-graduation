@@ -1,6 +1,6 @@
 # 🌍 Job Market Intelligence & Career Advisor
 
-> **Ironhack Final Project — End-to-End Data Science & Machine Learning**
+> **Ironhack Final Project — Data Science & Machine Learning**
 
 A Streamlit dashboard that combines **exploratory data analysis**, **salary prediction (ML)**, **AI career coaching (RAG + DeepSeek)**, and a **live job finder** scanning 7 global regions.
 
@@ -10,16 +10,16 @@ streamlit run app/streamlit_app.py
 
 ---
 
-## 📊 Features
+## Features
 
 ### 4 Tabs
 
 | Tab | Description |
 |---|---|
-| 📊 **Market Explorer** | Interactive charts — salary by experience, company size, DS/ML field. Toggle between all jobs and DS/ML/DL only. |
-| 💰 **Salary Predictor** | Select role + experience + location → estimated salary based on historical data. |
-| 🤖 **AI Career Coach** | Chat with a RAG-powered assistant (DeepSeek) that answers questions backed by real salary data. |
-| 🌍 **Live Job Finder** | Tavily-powered search across 7 regions for real-time DS/ML/DL **and** Aerospace engineering jobs. |
+| **Market Explorer** | Interactive charts — salary by experience, company size, DS/ML field. Toggle between all jobs and DS/ML/DL only. |
+| **Salary Predictor** | Select role + experience + location → estimated salary based on historical data. |
+| **AI Career Coach** | Chat with a RAG-powered assistant (DeepSeek) that answers questions backed by real salary data. |
+| **Live Job Finder** | Tavily-powered search across 7 regions for real-time DS/ML/DL **and** Aerospace engineering jobs. |
 
 ### ML Models
 
@@ -30,7 +30,7 @@ streamlit run app/streamlit_app.py
 
 ---
 
-## 🌍 Live Job Finder — 7 Regions
+## Live Job Finder — 7 Regions
 
 | Region | Search Focus |
 |---|---|
@@ -44,7 +44,7 @@ streamlit run app/streamlit_app.py
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 project-ds-ml-end/
@@ -74,7 +74,7 @@ project-ds-ml-end/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone & install dependencies
 
@@ -95,8 +95,8 @@ Invoke-WebRequest -Uri "https://huggingface.co/datasets/hugginglearners/data-sci
 ### 3. Set up API keys (`.env`)
 
 ```env
-DEEPSEEK_API_KEY=sk-...     # Required for 🤖 AI Career Coach (RAG chatbot)
-TAVILY_API_KEY=tvly-...     # Required for 🌍 Live Job Finder
+DEEPSEEK_API_KEY=sk-...     # Required for AI Career Coach (RAG chatbot)
+TAVILY_API_KEY=tvly-...     # Required for Live Job Finder
 ```
 
 ### 4. Run the notebooks (in order)
@@ -115,7 +115,7 @@ streamlit run app/streamlit_app.py
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
