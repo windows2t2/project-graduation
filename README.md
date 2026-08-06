@@ -1,4 +1,4 @@
-# 🌍 Job Market Intelligence & Career Advisor
+# Job Market Intelligence & Career Advisor
 
 > **Ironhack Final Project — Data Science & Machine Learning**
 
