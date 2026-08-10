@@ -31,6 +31,7 @@ COUNTRY_MAP = {
     "MY": "Malaysia", "NG": "Nigeria", "NL": "Netherlands", "NZ": "New Zealand",
     "PK": "Pakistan", "PL": "Poland", "PT": "Portugal", "RO": "Romania",
     "RU": "Russia", "SG": "Singapore", "SI": "Slovenia", "TR": "Turkey",
+    "TN": "Tunisia",
     "UA": "Ukraine", "US": "United States", "VN": "Vietnam",
 }
 
