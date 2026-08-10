@@ -159,11 +159,32 @@ with tab2:
 # ══════════════════════════════════════════════
 with tab3:
     st.header("🤖 AI Career Coach")
+
+    # Narrow the chat input + send button to 50% of the page width
+    st.markdown(
+        """
+        <style>
+        [data-testid="stChatInput"] { max-width: 50%; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     cfg = get_deepseek_config()
     if not cfg["api_key"]:
         st.warning("Set DEEPSEEK_API_KEY in .env")
     else:
-        st.success(f"DeepSeek ready ({cfg['model']})")
+        # Green "ready" box, 50% width — matches the chat input
+        st.markdown(
+            f"""
+            <div style="max-width:50%; padding:0.6rem 1rem; border-radius:0.5rem;
+                        border:1px solid #2e7d32; background:#e8f5e9; color:#1b5e20;
+                        font-size:0.9rem;">
+              ✅ <b>DeepSeek ready</b> ({cfg['model']})
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     if "msgs" not in st.session_state:
         st.session_state.msgs = []
