@@ -10,9 +10,9 @@ an **AI career coach** (RAG chatbot), and a **live job finder** across 7 regions
 
 ---
 
-## 🚀 Quick start (2 minutes)
+## 🚀 Quick start
 
-### 1. Install everything (one command)
+### 1. Install everything
 
 Open a **terminal** in this project folder and run:
 
@@ -52,7 +52,7 @@ Your browser opens `http://localhost:8501` with the dashboard. That's it! 🎉
 
 ---
 
-## 📁 Project layout (what's where)
+## 📁 Project layout
 
 | Folder / file | What it is |
 |---|---|
@@ -93,7 +93,7 @@ Your browser opens `http://localhost:8501` with the dashboard. That's it! 🎉
 
 ---
 
-## 📓 The notebooks (optional, in order)
+## 📓 The notebooks
 
 Run them if you want to re-generate the data, charts, and models from scratch:
 
