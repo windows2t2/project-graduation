@@ -108,22 +108,6 @@ Run them if you want to re-generate the data, charts, and models from scratch:
 
 ---
 
-## 🤔 Common questions
-
-**"Does this need an NVIDIA GPU?"**
-No. Everything runs on the CPU. `setup.sh` installs the CPU-only build of
-`torch` so you never download ~4 GB of useless GPU libraries.
-
-**"Why is `.venv/` so big?"**
-It contains all the libraries. That's normal. It's private to this project
-and should never be uploaded/shared.
-
-**"The AI Coach / Job Finder show a warning?"**
-Those two tabs need your API keys in `.env` (step 2 above). The AI Coach also
-needs the vector store built by `03_rag_build.ipynb`.
-
----
-
 ## 🛠 Tech stack
 
 | Layer | Technology |
