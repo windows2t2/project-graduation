@@ -122,4 +122,4 @@ Run them if you want to re-generate the data, charts, and models from scratch:
 
 ---
 
-*Built for the Ironhack Data Science & Machine Learning bootcamp.*
+*built by enthusiasts*
