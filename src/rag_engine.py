@@ -26,13 +26,22 @@ CHUNK_OVERLAP = 100
 
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
+# Cloud DeepSeek — used as a fallback when the configured (e.g. local) endpoint is down.
+CLOUD_BASE_URL = "https://api.deepseek.com"
+CLOUD_MODEL = "deepseek-chat"
+
 
 # ---------------------------------------------------------------------------
 # DeepSeek client (raw OpenAI-compatible, no LangChain wrapper)
 # ---------------------------------------------------------------------------
-def _get_deepseek_client() -> OpenAIClient:
+def _get_deepseek_client(base_url: Optional[str] = None, max_retries: int = 1) -> OpenAIClient:
     cfg = get_deepseek_config()
-    return OpenAIClient(api_key=cfg["api_key"], base_url=cfg["base_url"])
+    return OpenAIClient(
+        api_key=cfg["api_key"],
+        base_url=base_url or cfg["base_url"],
+        max_retries=max_retries,
+        timeout=30.0,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -86,21 +95,27 @@ def load_vector_store(collection_name="job_market"):
 # RAG — manual retrieval + DeepSeek
 # ---------------------------------------------------------------------------
 def create_rag_chain(vector_store=None, collection_name="job_market"):
-    """Return a dict with 'retriever' and 'client' for ask()."""
+    """Return a dict with 'retriever' and 'config' for ask()."""
     if vector_store is None:
         vector_store = load_vector_store(collection_name)
+    cfg = get_deepseek_config()
     return {
         "retriever": vector_store.as_retriever(search_kwargs={"k": 5}),
-        "client": _get_deepseek_client(),
-        "model": get_deepseek_config()["model"],
+        "client": _get_deepseek_client(),  # kept for backward compatibility
+        "config": cfg,
+        "model": cfg["model"],
     }
 
 
 def ask(chain: dict, question: str) -> dict:
-    """Retrieve relevant docs, construct prompt, call DeepSeek."""
+    """Retrieve relevant docs, construct prompt, call DeepSeek.
+
+    Tries the configured endpoint first (e.g. local llama.cpp on :8080) and
+    falls back to the cloud DeepSeek API if that one is unreachable, so a dead
+    backend never crashes the app.
+    """
     retriever = chain["retriever"]
-    client = chain["client"]
-    model = chain["model"]
+    cfg = chain.get("config") or get_deepseek_config()
 
     # Retrieve
     docs = retriever.invoke(question)
@@ -114,16 +129,34 @@ def ask(chain: dict, question: str) -> dict:
         f"JOB MARKET DATA:\n{context}"
     )
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": question},
-        ],
-        temperature=0.3,
-        max_tokens=1024,
-    )
+    # Endpoint candidates: configured first, cloud DeepSeek as fallback.
+    base_url = (cfg.get("base_url") or CLOUD_BASE_URL).rstrip("/")
+    endpoints = [{"base_url": base_url, "model": cfg.get("model") or CLOUD_MODEL}]
+    if base_url != CLOUD_BASE_URL:
+        endpoints.append({"base_url": CLOUD_BASE_URL, "model": CLOUD_MODEL})
 
-    answer = response.choices[0].message.content
-    sources = [d.page_content[:300] for d in docs]
-    return {"answer": answer, "sources": sources}
+    last_err: Optional[Exception] = None
+    for ep in endpoints:
+        try:
+            client = _get_deepseek_client(base_url=ep["base_url"], max_retries=1)
+            response = client.chat.completions.create(
+                model=ep["model"],
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": question},
+                ],
+                temperature=0.3,
+                max_tokens=1024,
+            )
+            answer = response.choices[0].message.content
+            sources = [d.page_content[:300] for d in docs]
+            return {"answer": answer, "sources": sources, "endpoint": ep["base_url"]}
+        except Exception as exc:  # noqa: BLE001 — try the next endpoint
+            last_err = exc
+            logger.warning("LLM endpoint %s failed (%s): %s", ep["base_url"], type(exc).__name__, exc)
+
+    raise RuntimeError(
+        "Could not reach any AI backend. Tried "
+        f"{[e['base_url'] for e in endpoints]}. Last error: "
+        f"{type(last_err).__name__}: {last_err}"
+    ) from last_err

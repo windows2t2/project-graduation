@@ -180,7 +180,7 @@ with tab3:
             <div style="max-width:50%; padding:0.6rem 1rem; border-radius:0.5rem;
                         border:1px solid #2e7d32; background:#e8f5e9; color:#1b5e20;
                         font-size:0.9rem;">
-              ✅ <b>DeepSeek ready</b> ({cfg['model']})
+              ✅ <b>AI Coach ready</b> · {cfg['model']} @ {cfg['base_url']}
             </div>
             """,
             unsafe_allow_html=True,
@@ -197,15 +197,27 @@ with tab3:
         with st.chat_message("user"):
             st.markdown(prompt)
         qa = get_rag()
+        backend = ""
         if qa:
             with st.spinner("Thinking..."):
-                result = ask(qa, prompt)
-                ans = result["answer"]
+                try:
+                    result = ask(qa, prompt)
+                    ans = result["answer"]
+                    backend = result.get("endpoint", "")
+                except Exception as exc:  # noqa: BLE001 — never crash on a dead backend
+                    ans = (
+                        f"⚠️ **Couldn't reach the AI backend.**\n\n"
+                        f"`{type(exc).__name__}: {exc}`\n\n"
+                        "Start the local LLM (`~/Documents/llamacpp/serve.sh qwen3-next`) "
+                        "or check your `.env` API keys."
+                    )
         else:
             ans = "Run the data pipeline + RAG build first."
         st.session_state.msgs.append({"role": "assistant", "content": ans})
         with st.chat_message("assistant"):
             st.markdown(ans)
+            if backend:
+                st.caption(f"via {backend}")
 
 # ══════════════════════════════════════════════
 # TAB 4: 🌍 Live Job Finder (Tavily)
