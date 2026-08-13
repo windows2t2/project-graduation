@@ -117,7 +117,6 @@ Run them if you want to re-generate the data, charts, and models from scratch:
 | ML | Scikit-learn, XGBoost, LightGBM |
 | RAG / AI | DeepSeek (OpenAI-compatible), LangChain, ChromaDB, sentence-transformers |
 | App | Streamlit |
-| REST API | FastAPI, Uvicorn |
 | Live search | Tavily API |
 
 ---
