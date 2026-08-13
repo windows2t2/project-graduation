@@ -31,16 +31,31 @@ any computer — **with or without an NVIDIA GPU** (most laptops have none).
 > .\.venv\Scripts\pip install -r requirements.txt
 > ```
 
-### 2. Add your API keys
+### 2. API keys & the AI Career Coach
 
-Create a file named `.env` in this folder (same place as `README.md`) with:
+Create a file named `.env` in this folder (same place as `README.md`).
+
+The **AI Career Coach** runs on a **local model by default — Qwen3-Coder-Next
+served by llama.cpp — so it needs no API key**. If you prefer the cloud, you can
+switch it back to the DeepSeek API instead:
 
 ```env
-DEEPSEEK_API_KEY=sk-...     # for the AI Career Coach  → https://platform.deepseek.com
+# AI Career Coach — pick ONE option:
+#   A) local model (llama.cpp, no real key — "local" is just a placeholder):
+DEEPSEEK_API_KEY=local
+DEEPSEEK_BASE_URL=http://localhost:8080/v1
+DEEPSEEK_MODEL=qwen3-coder-next
+#   B) cloud DeepSeek API (uncomment to use instead):
+# DEEPSEEK_API_KEY=sk-...                  # → https://platform.deepseek.com
+# DEEPSEEK_BASE_URL=https://api.deepseek.com
+# DEEPSEEK_MODEL=deepseek-chat
+
 TAVILY_API_KEY=tvly-...     # for the Live Job Finder   → https://tavily.com
 ```
 
-> ⚠️ Never share this file. It holds your private keys.
+> To use option **A**, run your local model with llama.cpp's `llama-server` on
+> `http://localhost:8080` and keep it running while you use Tab 3.
+> ⚠️ Never share this file — it holds your private keys.
 
 ### 3. Start the app
 
@@ -65,7 +80,7 @@ Your browser opens `http://localhost:8501` with the dashboard. That's it! 🎉
 | `models/` | Trained ML models (created when you run the notebooks) |
 | `setup.sh` | One-command installer (Linux/macOS) |
 | `requirements.txt` | List of libraries to install |
-| `.env` | Your secret API keys (you create this) |
+| `.env` | Your secret API keys + optional local-model settings (you create this) |
 | `.venv/` | The private environment (created by setup.sh — leave it) |
 
 ### What each `src/` module does
@@ -75,7 +90,7 @@ Your browser opens `http://localhost:8501` with the dashboard. That's it! 🎉
 | `data_loader.py` | Reads & cleans the salary data |
 | `preprocessing.py` | Prepares data for machine learning |
 | `models.py` | Trains & evaluates the ML models |
-| `rag_engine.py` | Powers the AI Career Coach (retrieval + DeepSeek) |
+| `rag_engine.py` | Powers the AI Career Coach (retrieval + local Qwen3 or DeepSeek API) |
 | `tavily_job_finder.py` | Live job search across 7 regions |
 | `applications.py` | Saves jobs & sends applications (SQLite) |
 | `utils.py` | Shared settings & API keys |
@@ -88,7 +103,7 @@ Your browser opens `http://localhost:8501` with the dashboard. That's it! 🎉
 |---|---|
 | **📊 Market Explorer** | Interactive charts — salary by experience, company size, field |
 | **💰 Salary Predictor** | Pick role + experience + location → estimated salary |
-| **🤖 AI Career Coach** | Chat with a RAG assistant backed by real salary data (needs DeepSeek key) |
+| **🤖 AI Career Coach** | Chat with a RAG assistant backed by real salary data (local Qwen3 — no key needed; cloud DeepSeek optional) |
 | **🌍 Live Job Finder** | Search live DS/ML/DL + Aerospace jobs in 7 regions (needs Tavily key) |
 
 ---
@@ -115,7 +130,7 @@ Run them if you want to re-generate the data, charts, and models from scratch:
 | Data | Pandas, NumPy |
 | Charts | Matplotlib, Seaborn, Plotly |
 | ML | Scikit-learn, XGBoost, LightGBM |
-| RAG / AI | DeepSeek (OpenAI-compatible), LangChain, ChromaDB, sentence-transformers |
+| RAG / AI | Qwen3-Coder-Next (local via llama.cpp) or DeepSeek API, LangChain, ChromaDB, sentence-transformers |
 | App | Streamlit |
 | Live search | Tavily API |
 
